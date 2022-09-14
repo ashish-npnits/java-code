@@ -16,10 +16,10 @@ spec:
         app: project
     spec:
       containers:
-      - image: httpd
-        name: httpd
+      - image: shwetashukla23/pipeline-demo:latest
+        name: java
         ports:
-        - containerPort: 8080
+        - containerPort: 80
 ---
 apiVersion: v1
 kind: Service
@@ -31,14 +31,10 @@ metadata:
   namespace: project
 spec:
   ports:
-  - port: 8080
-    protocol: TCP
-    targetPort: 9376
+  - port: 80
   selector:
     app: project
-  type: LoadBalancer
-status:
-  loadBalancer: {}
+  type: ClusterIP
 ---
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
@@ -56,3 +52,18 @@ spec:
 status:
   currentReplicas: 0
   desiredReplicas: 0
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: project-ingress
+  namespace: project
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: projectsvc
+            port:
+              number: 80
